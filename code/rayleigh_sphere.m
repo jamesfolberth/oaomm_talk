@@ -24,6 +24,9 @@ problem.ehess = @(x,u) -2*A*u;
 [x,xcost,info,opt] = trustregions(problem);
 %[x,xcost,info,opt] = steepestdescent(problem);
 
+-xcost
+eigs(A,1,'LA')
+
 % Display some statistics
 figure
 semilogy([info.iter], [info.gradnorm], '.-');
