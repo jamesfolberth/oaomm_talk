@@ -23,10 +23,17 @@ opt = struct('tolgradnorm', 1e-6);
 %[Y,Ycost,info,opt] = steepestdescent(problem);
 
 % Y is an ON representation of the invariant subspace corresponding to the p largest eigenvalues
-eig(Y'*A*Y)    % gives the top p eigenvalues of A
+[Vp,D] = eig(Y'*A*Y);    % gives the top p eigenvalues of A
+diag(D)
 eigs(A,p,'LA')
 trace(Y'*A*Y)  % see Prop 2.1.1
 sum(eigs(A,p,'LA'))
+
+V = Y*Vp; % these are the p rightmost eigenvectors
+V'*A*V
+
+[Veigs,~] = eigs(A,p,'LA');
+M.dist(Veigs,V) % induced distance
 
 % Display some statistics
 figure
