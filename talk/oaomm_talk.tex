@@ -48,42 +48,42 @@
 %\algnewcommand\algorithmicinput
 
 %% Inserting code and syntax highlighting
-%% [[[
-%\usepackage{listings} % like verbatim, but allows for syntax highlighting and more
-%\usepackage{color} % colors
+% [[[
+\usepackage{listings} % like verbatim, but allows for syntax highlighting and more
+\usepackage{color} % colors
 %\usepackage[usenames,dvipsnames]{xcolor}% More colors
-%\usepackage{caption} % captions
-%\DeclareCaptionFont{white}{\color{white}}
-%\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
-%\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
-%\usepackage{framed} % put a frame around things
-%
-%% define some custom colors
-%\definecolor{dkgreen}{rgb}{0,0.6,0}
-%\definecolor{lgreen}{rgb}{0.25,1,0}
-%\definecolor{purple}{rgb}{0.35,0.02,0.48}
-%
-%% Some changes to MATLAB/GNU Octave language in listings
-%\lstset{frame=tbrl,
-%    language=Matlab,
-%    aboveskip=3mm,
-%    belowskip=3mm,
-%    belowcaptionskip=3mm,
-%    showstringspaces=false,
-%    columns=flexible,
-%    basicstyle={\small\ttfamily\color{black}},
-%    numbers=left,
-%    numberstyle=\tiny\color{purple},
-%    keywordstyle=\color{dkgreen},
-%    commentstyle=\color{red},
-%    stringstyle=\color{purple},
-%    breaklines=true,
-%    breakatwhitespace=true,
-%    tabsize=4,
-%    rulecolor=\color{black},
-%    morekeywords={string,fstream}
-%}
-%% ]]]
+\usepackage{caption} % captions
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+\usepackage{framed} % put a frame around things
+
+% define some custom colors
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{lgreen}{rgb}{0.25,1,0}
+\definecolor{purple}{rgb}{0.35,0.02,0.48}
+
+% Some changes to MATLAB/GNU Octave language in listings
+\lstset{frame=tbrl,
+    language=Matlab,
+    aboveskip=3mm,
+    belowskip=3mm,
+    belowcaptionskip=3mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\scriptsize\ttfamily\color{black}},
+    numbers=left,
+    numberstyle=\tiny\color{purple},
+    keywordstyle=\color{dkgreen},
+    commentstyle=\color{red},
+    stringstyle=\color{purple},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    rulecolor=\color{black},
+    morekeywords={string,fstream}
+}
+% ]]]
 
 
 %My Functions
@@ -145,8 +145,8 @@
 
 \title{A Brief Introduction to Optimization Algorithms on Matrix Manifolds}
 \date{11 October, 2016}
-\author{James Folberth}
-%\institute{University of Colorado at Boulder}
+\author{James Folberth} %TODO add Stephen as advisor?  Don't want people to think this is our work!
+\institute{University of Colorado at Boulder}
 
 % Abstract: (no word wrap)
 %Certain optimization problems have special, geometric constraints, which specify that the solution of the optimization problem must lie on a manifold.  The recent text "Optimization Algorithms on Matrix Manifolds", by P.-A. Absil, R. Mahoney, and R. Sepulchre (2008), develops the necessary machinery from differential geometry and discusses various problems on matrix manifolds, with an emphasis on computing invariant subspaces of matrices.  The authors develop gradient descent, Newton's method, trust-region methods, and other high-order methods.  This talk will highlight some of the tools required to pose gradient descent on matrix manifolds, demonstrate a few examples in Manopt, a MATLAB toolbox for optimization on manifolds, and discuss a few recent results.  None of this talk is my own work, but I hope to convey some of the excitement in this field which is quickly gaining momentum.
@@ -173,6 +173,8 @@
 \end{frame}
 
 %TODO should we have a section name slide (e.g. a slide with a big "A Motivating Example" in the middle)?
+%TODO CU colors?  I asked Stephen before, but didn't follow through
+%TODO Riemann Newton's connection to Jacobi-Davidson
 
 \begin{frame}{A Recent Textbook}
 % [[[
@@ -248,6 +250,7 @@
 \end{frame}
 
 
+%TODO want to put Embedded submanifold, Quotient manifold.  How to format?
 \begin{frame}{Rayleigh Quotient}
    \begin{columns}
       \begin{column}{0.5\textwidth}
@@ -261,6 +264,10 @@
    %NOTE This takes an unconstrained problem and adds a constraint.  We handle the constraint
    %     by incorporating the constraint into the geometry of the domain.
    
+   \begin{center}
+      ~\\[1.45em] %HACK
+      \color{red}{Embedded submanifold}
+   \end{center}
       \end{column}
 
       \begin{column}{0.5\textwidth}
@@ -274,13 +281,17 @@
    %     This set admits the structure of a quotient manifold; it is, in fact, RP^{n-1}
    
    Since $f(y\alpha)=f(y)$ $\forall \alpha \neq 0$, $f$ induces a well-defined function on $\mathcal{M}$.
+
+   \begin{center}
+      \color{red}{Quotient manifold}
+   \end{center}
       \end{column}
    \end{columns}
 \end{frame}
 
 %TODO how to wrap up Rayleigh quotient example?
 
-%TODO where to put this?  Seems kinda out of place
+%TODO where to put this?  Seems out of place
 \begin{frame}{Some Common Manifolds}
 
    \begin{description}
@@ -402,7 +413,7 @@
 
          \[ g_x(\operatorname{grad}f(x),\xi) = Df(x)[\xi], \quad \forall \xi\in T_x\mathcal{M}. \] 
 
-         \noindent Can compute this ``Riemannian'' gradient from the ``Euclidean'' gradient $\nabla \bar{f}(x)$.
+         \noindent Can compute the Euclidean gradient $\nabla \bar{f}(x)$ and convert to Riemannian gradient $\operatorname{grad}f(x)$.
 
    \end{itemize}
 
@@ -480,6 +491,10 @@
    %     (e.g. PD matrices)
      
    Along the curve, $f(\gamma(t))$ is a smooth function from $\reals$ to $\reals$.  Can use standard line-search methods (e.g. Armijo backtracking).
+
+   \begin{center}
+      \includegraphics[width=0.8\textwidth]{figures/GD_M.pdf}
+   \end{center}
   
 \end{frame}
 
@@ -522,16 +537,214 @@
    \end{algorithm}
 
 \end{frame}
-% ]]]
 
-%\section{Newton's Method}
-%\begin{frame}
-%\end{frame}
+
+\begin{frame}{Higher-order Methods}
+   ``Optimization Algorithms on Matrix Manifolds'' also discusses higher-order methods:
+   \begin{itemize}
+      \item Newton's method
+      \item Trust-region methods
+      \item quasi-Newton methods
+      \item Conjugate gradients\\[1em]
+   \end{itemize}
+
+   Additional elements of differential geometry are required:
+   \begin{itemize}
+      \item Affine connections (e.g. Levi-Civita)
+      \item Riemannian Hessian
+      \item Vector transport
+   \end{itemize}
+
+\end{frame}
+% ]]]
 
 
 \section{Manopt}
 % [[[
-\begin{frame}
+\begin{frame}{Manopt}{}
+   {\sc matlab} toolbox developed by Nicolas Boumal and Bamdev Mishra, with many user contributions.
+   \begin{center}
+      \includegraphics[width=\textwidth]{figures/manopt_org.png}
+   \end{center}
+\end{frame}
+
+%TODO highlight code, or just display only the portion we care about?  Ask Stephen.
+%\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+%
+%{
+%\begin{lstlisting}[language=Matlab,escapechar=!]
+%% Generate symmetric matrix
+%!\colorbox{yellow}{n = 1000;}!
+%!\colorbox{yellow}{A = randn(n); A = 0.5*(A+A.');}!
+%
+%% Create problem structure
+%!\colorbox{yellow}{M = spherefactory(n);}!
+%!\colorbox{yellow}{problem.M = M;}!
+%
+%% Define cost function and Euclidean gradient
+%problem.cost = @(x) -x'*(A*x);
+%problem.egrad = @(x) -2*A*x;
+%
+%% Numerically check gradient consistency
+%%checkgradient(problem);
+%
+%% Solve
+%[x,xcost,info,opt] = trustregions(problem);
+%\end{lstlisting}
+%}
+%
+%\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+   
+   \begin{lstlisting}[language=Matlab]
+% Generate symmetric matrix
+n = 1000;
+A = randn(n); A = 0.5*(A+A.');
+
+% Create problem structure
+M = spherefactory(n);
+problem.M = M;
+   \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+
+{\tiny
+\begin{verbatim}
+>> M
+
+M = 
+
+                   name: @()sprintf('Sphere S^%d',n-1)
+                    dim: @()n*m-1
+                  inner: @(x,d1,d2)d1(:).'*d2(:)
+                   norm: @(x,d)norm(d,'fro')
+                   dist: @(x,y)real(acos(x(:).'*y(:)))
+            typicaldist: @()pi
+                   proj: @(x,d)d-x*(x(:).'*d(:))
+                tangent: @(x,d)d-x*(x(:).'*d(:))
+            egrad2rgrad: @(x,d)d-x*(x(:).'*d(:))
+            ehess2rhess: @spherefactory/ehess2rhess
+                    exp: @exponential
+                   retr: @retraction
+                    log: @spherefactory/logarithm
+                   hash: @(x)['z',hashmd5(x(:))]
+                   rand: @()random(n,m)
+                randvec: @(x)randomvec(n,m,x)
+                lincomb: @matrixlincomb
+                zerovec: @(x)zeros(n,m)
+                 transp: @(x1,x2,d)M.proj(x2,d)
+               pairmean: @spherefactory/pairmean
+                    vec: @(x,u_mat)u_mat(:)
+                    mat: @(x,u_vec)reshape(u_vec,[n,m])
+    vecmatareisometries: @()true
+\end{verbatim} 
+}
+\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+
+{
+\begin{lstlisting}[language=Matlab,escapechar=!]
+% Generate symmetric matrix
+n = 1000;
+A = randn(n); A = 0.5*(A+A.');
+
+% Create problem structure
+M = spherefactory(n);
+problem.M = M;
+
+% Define cost function and Euclidean gradient
+problem.cost = @(x) -x'*(A*x);
+problem.egrad = @(x) -2*A*x;
+
+% Numerically check gradient consistency
+checkgradient(problem);
+\end{lstlisting}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+   Manopt has tools to check gradients, Hessians, etc.
+   \begin{center}
+      \includegraphics[width=\textwidth]{figures/rayleigh_sphere_gradcheck.pdf}
+   \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+
+{
+\begin{lstlisting}[language=Matlab,escapechar=!]
+% Generate symmetric matrix
+n = 1000;
+A = randn(n); A = 0.5*(A+A.');
+
+% Create problem structure
+M = spherefactory(n);
+problem.M = M;
+
+% Define cost function and Euclidean gradient
+problem.cost = @(x) -x'*(A*x);
+problem.egrad = @(x) -2*A*x;
+
+% Numerically check gradient consistency
+%checkgradient(problem);
+
+% Solve
+[x,xcost,info,opt] = trustregions(problem);
+\end{lstlisting}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
+   \begin{center}
+      \includegraphics[width=\textwidth]{figures/rayleigh_sphere_gradnorm.pdf}
+   \end{center}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $\mathrm{Grass}(p,n)$}
+\begin{lstlisting}[language=Matlab,escapechar=!]
+% Generate symmetric matrix
+n = 1000;
+A = randn(n); A = 0.5*(A+A.');
+
+% Create problem structure
+p = 5;
+M = grassmannfactory(n,p);
+problem.M = M;
+
+% Define cost function and Riemannian gradient
+problem.cost = @(Y) -trace(Y'*A*Y);
+problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
+
+% Numerically check gradient consistency
+%checkgradient(problem);
+
+% Solve
+[Y,Ycost,info,opt] = trustregions(problem);
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $\mathrm{Grass}(p,n)$}
+   \begin{center}
+      \includegraphics[width=\textwidth]{figures/rayleigh_grassmann_gradnorm.pdf}
+   \end{center}
+\end{frame}
+
+%TODO this slide isn't complete
+\begin{frame}{Manopt}
+   Manopt is modular:
+   \begin{itemize}
+      \item Manifolds (55 currently implemented)
+      \item Solvers (GD, CG, Trust-region, etc.)
+      \item Tools (gradient check)
+   \end{itemize}
 \end{frame}
 
 % ]]]
@@ -547,8 +760,29 @@
 % ]]]
 
 
-%TODO slide pointing to where I stole things from
+\begin{frame}{Thanks!}
+    
+   
+   References:
+   \begin{itemize}
+      \item P.-A. Absil, R. Mahoney, R. Sepulchre, \emph{Optimization Algorithms on Matrix Manifolds}, Princeton University Press (2008).
+   \end{itemize}
+\end{frame}
 
+
+
+\begin{frame}{Pictures}
+   I took various pictures from
+   
+   \begin{itemize}
+      \item ``Optimization Algorithms on Matrix Manifolds''
+      \item ``Optimization on Manifolds: Methods and Applications'', P.-A. Absil at British-French-German Conference on Optimization, 2009.
+      \item Wikipedia
+   \end{itemize}
+
+\end{frame}
+
+% [[[ OLD TALK
 %\begin{frame}{Outline}
 %   \begin{enumerate}
 %      \item A generic optimiztion problem
@@ -1124,6 +1358,7 @@
 %\end{frame}
 %% ]]]
 
+% ]]]
 
 \end{document}
 

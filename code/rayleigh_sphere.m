@@ -14,11 +14,12 @@ problem.M = M;
 %problem.costgrad = @(x) local_costgrad(M,A,x);
 problem.cost = @(x) -x'*(A*x);
 problem.egrad = @(x) -2*A*x;
-problem.ehess = @(x,u) -2*A*u;
+%problem.ehess = @(x,u) -2*A*u;
 
 % Numerically check gradient consistency
 %checkgradient(problem);
 %checkhessian(problem);
+%return
 
 % Solve
 [x,xcost,info,opt] = trustregions(problem);
@@ -30,6 +31,7 @@ eigs(A,1,'LA')
 % Display some statistics
 figure
 semilogy([info.iter], [info.gradnorm], '.-');
+title('Norm of the gradient of f');
 xlabel('Iteration Number');
 ylabel('Norm of the gradient of f');
 

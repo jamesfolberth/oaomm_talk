@@ -5,14 +5,15 @@ rng(271828);
 n = 1000;
 A = randn(n); A = 0.5*(A+A.');
 
-p = 5;
-
 % Create problem structure
+p = 5;
 M = grassmannfactory(n,p);
 problem.M = M;
 
 % Define the problem cost function and its Euclidean gradient
-problem.costgrad = @(Y) local_costgrad(M,A,Y);
+%problem.costgrad = @(Y) local_costgrad(M,A,Y);
+problem.cost = @(Y) -trace(Y'*A*Y);
+problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
 
 % Numerically check gradient consistency
 %checkgradient(problem);
@@ -38,6 +39,7 @@ M.dist(Veigs,V) % induced distance
 % Display some statistics
 figure
 semilogy([info.iter], [info.gradnorm], '.-');
+title('Norm of the gradient of f');
 xlabel('Iteration Number');
 ylabel('Norm of the gradient of f');
 
