@@ -43,8 +43,9 @@
 %\definecolor{table_header}{gray}{0.5}
 %\definecolor{table_data}{gray}{0.85}
 
-\usepackage{algorithm}
+\usepackage[Algorithm,ruled]{algorithm}
 \usepackage{algpseudocode,algorithmicx}
+%\algnewcommand\algorithmicinput
 
 %% Inserting code and syntax highlighting
 %% [[[
@@ -99,7 +100,7 @@
 %\newcommand{\defeq}{\stackrel{\operatorname{def}}{=}}
 
 % AMS theorem stuff
-%% [[[
+% [[[
 %\newtheoremstyle{mystuff}{}{}{\itshape}{}{\bfseries}{:}{.5em}{}
 %\theoremstyle{mystuff}
 %\newtheorem{definition}{Definition}[section]
@@ -109,7 +110,7 @@
 %\newtheorem{lemma}{Lemma}[section]
 %\newtheorem*{lemma*}{Lemma}
 %\newtheorem{proposition}{Proposition}[section]
-%\newtheorem*{proposition*}{Proposition}
+\newtheorem*{proposition*}{Proposition}
 %\newtheorem*{corollary*}{Corollary}
 %\newtheorem*{remark}{Remark}
 %
@@ -124,8 +125,7 @@
 %\newtheoremstyle{named}{}{}{\itshape}{}{\bfseries}{:}{.5em}{\thmnote{#3's }#1}
 %\theoremstyle{named}
 %\newtheorem*{namedtheorem}{Theorem}
-%% ]]]
-
+% ]]]
 %]]]
 
 
@@ -135,6 +135,7 @@
 \def\figures{1}
 \def\tables{1}
 
+\newcommand{\drm}{\mathrm{d}}
 \renewcommand{\UrlFont}{\scriptsize}
 \newcommand{\defeq}{\mathrel{\mathop:}=}
 \DeclareMathOperator*{\argmin}{arg\,min}
@@ -144,11 +145,12 @@
 
 \title{A Brief Introduction to Optimization Algorithms on Matrix Manifolds}
 \date{11 October, 2016}
-\author{James Folberth\\Advisor: Stephen Becker}
-\institute{University of Colorado at Boulder}
+\author{James Folberth}
+%\institute{University of Colorado at Boulder}
 
 % Abstract:
 % 
+ 
 
 \begin{document}
 
@@ -156,8 +158,382 @@
 \maketitle
 \end{frame}
 
+%TODO should we have a section name slide (e.g. a slide with a big "A Motivating Example" in the middle)?
+
+\begin{frame}{A Recent Textbook}
+% [[[
+   Most of the material in this talk is from \emph{Optimization Algorithms on Matrix Manifolds}, P.-A. Absil, R. Mahoney, R. Sepulchre, Princeton University Press, 2008.\\
+   
+   \begin{columns}
+      \begin{column}{0.4\textwidth}
+         \begin{center}
+            \includegraphics[width=0.8\columnwidth]{figures/oaomm_cover.png}
+         \end{center}
+
+      \end{column}
+      \begin{column}{0.6\textwidth}
+         {\footnotesize
+         \begin{enumerate}[1.]
+            \item Introduction
+            \item Motivation and Applications
+            \item Matrix Manifolds: First-Order Geometry
+            \item Line-Search Algorithms on Manifolds
+            \item Matrix Manifolds: Second-Order Geometry
+            \item Newton's Method
+            \item Trust-Region Methods
+            \item A Constellation of Superlinear Algorithms
+         \end{enumerate}
+         }
+      \end{column}
+   \end{columns}
+% ]]]
+\end{frame}
 
 
+\section{A Motivating Example}
+% [[[
+\begin{frame}{Extreme Eigenspace Computation}
+   Consider a symmetric matrix $A\in\reals^{n\times n}$ with eigenvalues $\lambda_1\le \cdots \le \lambda_n$.
+
+   \begin{proposition*}
+      Consider the \emph{generalized Rayleigh quotient}
+      
+      %NOTE f(Y) depends only of span(Y), not on each individual column;
+      %     This a fundamental reason for optimizing of Grass(p,n)
+      \[ f:\reals^{n\times p}_\ast \to \reals : Y \mapsto f(Y) = \operatorname{tr}(Y^TAY(Y^TY)^{-1}) \] 
+
+      \noindent defined on $\reals^{n\times p}_\ast$, the set of all real $n\times p$ full-rank matrices.\\
+
+      TFAE:
+      \begin{enumerate}[1.]
+         \item $Y_\ast$ is a global minimizer of $f(Y)$ over $\reals^{n\times p}_\ast$;
+         \item $\operatorname{span}(Y_\ast)$ is a leftmost invariant subspace of $A$;
+         \item $f(Y_\ast) = \sum_{i=1}^p \lambda_i$.
+      \end{enumerate}
+   \end{proposition*}
+
+\end{frame}
+
+
+\begin{frame}{Rayleigh Quotient}
+   For simplicity, take $p=1$ and assume $\lambda_1$ has multiplicity 1.\\
+
+   \[ f: \reals^n_\ast \to \reals: y\mapsto f(y) = \dfrac{y^TAy}{y^Ty}. \] 
+
+   %NOTE no interesting manifold aspects; \reals^n is a linear manifold (in fact, a Euclidean space)
+   \noindent $\reals^n_\ast$ is $\reals^n$ with the origin removed.\\[.5em]
+   
+   %NOTE Critical points of $f$ correspond to eigenvalues of $A$.
+
+   \noindent The minimizers of $f(y)$ are \emph{not} isolated: they appear as the continuum $v_1\reals_\ast$.\\[.5em]
+
+   \noindent Consequently, important optimization algorithms may not apply.\\[.5em]
+   
+   %TODO shorten to "... for every noncritical y"?
+   \noindent Newton's method applied to the Rayleigh quotient yields the iteration $y\mapsto 2y$ for every $y$ such that $f(y)$ is not an eigenvalue of $A$.
+\end{frame}
+
+
+\begin{frame}{Rayleigh Quotient}
+   \begin{columns}
+      \begin{column}{0.5\textwidth}
+   A standard remedy is to restrict the Rayleigh quotient to the unit sphere
+
+   \[ S^{n-1}\defeq \left\{y\in\reals^n \,:\, y^Ty=1\right\}. \]
+   
+   \noindent Minimizers are now isolated, however the domain of $f$ is now nonlinear.\\[.5em]
+   %NOTE but that's okay, because that's the whole point of the book.
+
+   %NOTE This takes an unconstrained problem and adds a constraint.  We handle the constraint
+   %     by incorporating the constraint into the geometry of the domain.
+   
+      \end{column}
+
+      \begin{column}{0.5\textwidth}
+   Another approach: Consider all points on a ray $y\reals_\ast$ as a single point.  This leads us to use the domain
+
+   \[ \mathcal{M} = \left\{y\reals_\ast \,:\, y\in\reals^n_\ast\right\}, \] 
+
+   \noindent the set of all 1-dimensional subspaces of $\reals^n$.\\[.5em]
+   %NOTE Each point of M is now an equivalence class of points in \reals^n_\ast.
+   %     In other words, M is the set of all 1-dimensional subspaces of \reals^n
+   %     This set admits the structure of a quotient manifold; it is, in fact, RP^{n-1}
+   
+   Since $f(y\alpha)=f(y)$ $\forall \alpha \neq 0$, $f$ induces a well-defined function on $\mathcal{M}$.
+      \end{column}
+   \end{columns}
+\end{frame}
+
+%TODO how to wrap up Rayleigh quotient example?
+
+%TODO where to put this?  Seems kinda out of place
+\begin{frame}{Some Common Manifolds}
+
+   \begin{description}
+      \item[Stiefel Manifold] $\mathrm{St}(p,n) \defeq \left\{X\in\reals^{n\times p}\,:\,X^TX=I_p\right\}$\\
+         $St(1,n) = S^{n-1}$\\
+         $St(n,n) = O_n$\\[.5em]
+         Applications in computer vision, PCA, ICA.\\[1em]
+
+      \item[Grassmann Manifold] $\mathrm{Grass}(p,n)$ is the set of all $p$-dimensional subspaces in $\reals^n$.\\
+         %NOTE Can identify $\mathrm{Grass}(p,n)$ with $\reals^{n\times p}_\ast\setminus\sim$, where
+         %\[ X\sim Y \leftrightarrow \operatorname{span}(X)=\operatorname{span}(Y). \] 
+         
+         $\mathrm{Grass}(1,n) = \reals\mathbb{P}^{n-1}$\\
+         $\mathrm{Grass}(n,n) = GL_n$\\
+         Applications in various dimension reduction problems.
+   \end{description}
+
+   There are many more (included in Manopt).
+\end{frame}
+
+% ]]]
+
+%TODO all this should go in a slide?  Maybe at the end?
+%NOTE what does additional geometric structure bring us?
+%     Convergence analysis is nice (optimization)
+%     Convergence speed is nice (gradient -> linear, higher-order -> superlinear)
+%     Matrix-free methods
+
+\section{Manifolds}
+% [[[
+\begin{frame}{What is a Manifold?}
+   Roughly, a topological space that locally resembles $\reals^d$ near each point.\\[0.5em]
+   
+   %NOTE We want all the charts (U,\varphi) to vary smoothly (C^\infty is a standard choice)
+   %     A maximal atlas of "nice+smooth" charts is a differentiable structure on M
+   %NOTE Mention that we're only going to work with smooth manifolds
+   \begin{center}
+      \includegraphics[width=0.9\textwidth]{figures/charts.pdf}
+   \end{center}
+\end{frame}
+
+
+\begin{frame}{Tangent Vectors}
+   Let $\gamma:\reals\to\mathcal{M}$ be a curve on $\mathcal{M}$ s.t. $\gamma(0)=x$.\\[.5em]
+   Can't always define tangent vectors as 
+
+   \[ \gamma'(0) = \lim_{\tau\to 0} \dfrac{\gamma(\tau)-\gamma(0)}{\tau}, \] 
+   
+   %NOTE And if M is linear, what are we even doing here?
+   \noindent as this requires a vector space structure on $\mathcal{M}$.
+    
+   %NOTE Here we visualize an embedded submanifold of a vector space \mathcal{E}.  The vector v in 
+   %     the figure corresponds to $\gamma'(0)$.  Roughly, \dot{\gamma}(0)f = Df(x)[\gamma'(0)]$.
+   \begin{center}
+      \includegraphics[width=0.7\textwidth]{figures/tangent_space.pdf}
+   \end{center}
+\end{frame}
+
+
+\begin{frame}{Tangent Vectors}
+   A tangent vector $\xi_x$ is a mapping, realized by $\gamma$, defined by %OLD taking $f$ to $\reals$ defined by
+   
+   %NOTE This definition makes sense because we can do f(gamma(tau)) - f(gamma(0)), since R is an TVS
+   %     Also, there are other ways of defining tangent vectors (e.g. derivations)
+   \[ \xi_x f = \dot{\gamma}(0)f \defeq \dfrac{\drm(f(\gamma(t)))}{\drm t}\biggr|_{t=0}, \] 
+   
+   \noindent for all smooth $f:\mathcal{M}\to\reals$.\\
+
+   %NOTE Be sure to mention that the tangent space admits a vector space structure.
+   \noindent The set of all tangent vectors based at $x$ is the tangent space $T_x\mathcal{M}$.  %TODO Do we need this: The tangent bundle is $\cup_{x\in\mathcal{M}}T_x\mathcal{M}$.
+
+   \begin{center}
+      \includegraphics[width=0.7\textwidth]{figures/tangent_space.pdf}
+   \end{center}
+\end{frame}
+
+
+\begin{frame}{Tangent Vectors}
+   Tangent vectors are used to generalize the directional derivative,
+
+   \[ Df(x)[\xi_x] = \lim_{t\to 0} \dfrac{f(x+t\xi_x)-f(x)}{t}, \] 
+   
+   \noindent where $x+t\xi_x$ only makes sense for vector spaces.\\[.5em]
+
+   \noindent More generally, if $\xi_x$ is realized by $\gamma(t)$,
+
+   \begin{align*} Df(x)[\xi_x] &= \xi_xf\\
+                               &= \dot{\gamma}(0)f = \dfrac{\drm(f(\gamma(t)))}{\drm t}\biggr|_{t=0}.
+                                 \end{align*}
+
+\end{frame}
+
+
+\begin{frame}{Riemannian Metric}
+   A Riemannian metric is a smoothly varying \emph{inner product} on the tangent spaces of $\mathcal{M}$:
+   
+   %NOTE The Riemannian metric can be induced from the ambient space (e.g. R^{n x p}), or somewhere else
+   %     The notation g_x is just to indicate that the metric generally depends on x\in M
+   \[ g(\xi_x,\zeta_x) = g_x(\xi_x,\zeta_x). \] 
+
+   A Euclidean space $\mathcal{E}$ is a particular Riemannian manifold.\\
+
+   A Riemannian metric allows us to compute
+   \begin{itemize}
+      \item lengths
+
+         \[ L(\gamma) = \int_a^b \sqrt{g(\dot{\gamma}(t),\dot{\gamma}(t))}\drm t. \] 
+
+      \item distances (a metric space \emph{metric})
+         
+         \[ \operatorname{dist}:\mathcal{M}\times\mathcal{M}\to\reals:\operatorname{dist}(x,y)=\inf_{\Gamma_{x\to y}} L(\gamma) \] 
+   \end{itemize}
+\end{frame}
+
+\begin{frame}{Riemannian Metric}
+   \begin{itemize}
+      %NOTE emphasize that this is the "Riemannian" gradient, but one can compute it from the "Euclidean" gradient
+      \item gradients: The unique element of $T_x\mathcal{M}$ that satisfies
+
+         \[ g_x(\operatorname{grad}f(x),\xi) = Df(x)[\xi], \quad \forall \xi\in T_x\mathcal{M}. \] 
+
+         \noindent Can compute this ``Riemannian'' gradient from the ``Euclidean'' gradient $\nabla \bar{f}(x)$.
+
+   \end{itemize}
+
+   \begin{center}
+      \includegraphics[width=\textwidth]{figures/gradient.pdf}
+   \end{center}
+\end{frame}
+
+% ]]]
+
+
+\section{Gradient Descent}
+% [[[
+\begin{frame}{Gradient Descent on $\reals^n$}
+   Consider gradient descent on $\reals^n$.  Initialize $x\in\reals^n$ and iterate
+
+   \[ x_{+}=x - t\nabla f(x). \] 
+
+   \noindent The idea is simple: head in the locally most promising direction ($-\nabla f(x)$) for an appropriate distance.\\[0.5em]
+
+   \noindent Line-search over the curve $\gamma(t) = x - t\nabla f(x)$.
+
+   %To generalize to a manifold $\mathcal{M}$, we need a few things:
+   %\begin{itemize}
+   %   \item To move away from $x_k$, we need to stay on $\mathcal{M}$.
+   %   \item Locally most promising direction
+   %\end{itemize}
+
+   \begin{center}
+      \includegraphics[width=0.8\textwidth]{figures/GD_Rn.pdf}
+   \end{center}
+
+\end{frame}
+
+\begin{frame}{Gradient Descent on $\mathcal{M}$}
+
+   Head in the direction of $-\operatorname{grad}f(x)$.\\[0.5em]
+
+   \noindent Line-search over a curve s.t. $\gamma(0)=x$ and $\dot{\gamma}(0)=-\operatorname{grad}f(x)$.\\[0.5em]
+
+   \noindent We need a method to cheaply find suitable curves (geodesics work, but are expensive to find).\\
+       
+   \begin{center}
+      \includegraphics[width=0.8\textwidth]{figures/GD_M.pdf}
+   \end{center}
+
+\end{frame}
+
+\begin{frame}{Retractions}
+   
+   A \emph{retraction} $R:T\mathcal{M}=\bigcup_x T_x\mathcal{M}\to\mathcal{M}$ satisfies
+   \begin{enumerate}[1.]
+      \item $R(0_x) = x$, where $0_x$ is the zero element of $T_x\mathcal{M}$
+      \item $\diff{}{t}R(t\xi_x)\biggr|_{t=0} = \xi_x \quad \forall \xi_x\in T_x\mathcal{M}$.
+   \end{enumerate}
+   
+   %NOTE compare to Exp_x, which is nice theoretically, but expensive to compute.
+   %     Retractions should be a cheaper alternative, unless geodesics have a nice closed form
+   %     (e.g. PD matrices)
+      
+   \begin{center}
+      \includegraphics[width=0.7\textwidth]{figures/retraction.pdf}
+   \end{center}
+\end{frame}
+
+\begin{frame}{Retractions}
+   
+   Equipped with a retraction $R$, the curve $\gamma(t) = R(-t\operatorname{grad}f(x))$ satisfies
+   \begin{enumerate}[1.]
+      \item $\gamma(0)=x$;
+      \item $\dot{\gamma}(0)=-\operatorname{grad}f(x)$.
+   \end{enumerate}
+   %NOTE compare to Exp_x, which is nice theoretically, but expensive to compute.
+   %     Retractions should be a cheaper alternative, unless geodesics have a nice closed form
+   %     (e.g. PD matrices)
+     
+   Along the curve, $f(\gamma(t))$ is a smooth function from $\reals$ to $\reals$.  Can use standard line-search methods (e.g. Armijo backtracking).
+  
+\end{frame}
+
+
+\begin{frame}{Gradient Descent for the Rayleigh Quotient on $S^{n-1}$}
+   Consider the sphere $S^{n-1}$.  We can view $x\in S^{n-1}$ as an element of $\reals^n$, and $\xi\in T_xS^{n-1}$ as an element of $T_x\reals^n\simeq \reals^n$.\\[.5em]
+
+   A suitable retraction on $S^{n-1}$ is the renormalization:
+
+   \[ R_x(\xi) = \dfrac{x+\xi}{\|x+\xi\|}. \] 
+   
+   ~\\
+   Consider the Rayleigh quotient on the sphere:
+   
+   \[ f:S^{n-1}\to \reals: x\mapsto f(x) =x^TAx. \] 
+
+   It is easy to show
+   
+   \[ \operatorname{grad}f(x)=(I-xx^T)2Ax = 2(Ax-xx^TAx). \] 
+
+\end{frame}
+
+
+\begin{frame}{Gradient Descent for the Rayleigh Quotient on $S^{n-1}$}
+   
+   \begin{algorithm}[H]
+      \caption{Armijo line search for the Rayleigh quotient on $S^{n-1}$}
+      \begin{algorithmic}[1] % the [1] adds line numbers
+         \Require Symmetric matrix $A$, Armijo backtracking parameters $\overline{\alpha}>0,\beta,\sigma\in(0,1)$.
+         \item[\textbf{Input:}] Initial iterate $x_0$ s.t. $\|x_0\|=1$. %XXX hacking algorithmicx package a bit
+         \item[\textbf{Output:}] Sequence of iterates $\{x_k\}$.
+         \For{k=0,1,2,...}
+            %\State Gradient: compute $\eta_k = -\operatorname{grad} f(x_k) = -2(Ax_k-x_kx_k^TAx_k).$
+            \State Gradient: compute ${\eta_k = -2(Ax_k-x_kx_k^TAx_k)}.$
+            \State Backtrack: find the smallest integer $m\ge 0$ such that
+            \[ f(R_{x_k}(\overline{\alpha}\beta^m\eta_k))\le f(x_k) - \sigma\overline{\alpha}\beta^m\eta_k^T\eta_k. \] 
+            \State Step: $x_{k+1}=R_{x_k}(\overline{\alpha}\beta^m\eta_k)$.
+         \EndFor
+      \end{algorithmic}
+   \end{algorithm}
+
+\end{frame}
+% ]]]
+
+%\section{Newton's Method}
+%\begin{frame}
+%\end{frame}
+
+
+\section{Manopt}
+% [[[
+\begin{frame}
+\end{frame}
+
+% ]]]
+
+
+%TODO g-convex result from S. Sra + R. Hosseini's paper
+%TODO low-rank matrix completion stuff?
+\section{Recent Work}
+% [[[
+\begin{frame}
+\end{frame}
+
+% ]]]
+
+
+%TODO slide pointing to where I stole things from
 
 %\begin{frame}{Outline}
 %   \begin{enumerate}
