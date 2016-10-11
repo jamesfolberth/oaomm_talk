@@ -143,6 +143,36 @@
 % http://tex.stackexchange.com/questions/43065/matrices-too-big-to-fit-the-width-of-a-page
 \newcommand\scalemath[2]{\scalebox{#1}{\mbox{\ensuremath{\displaystyle #2}}}}
 
+% Taken from _somewhere_ in Stephen's slides
+% Adds outline slide before each section
+\AtBeginSection[]
+%\AtBeginSubsection[]
+{\begin{frame}
+        \frametitle{Outline}
+        \small
+        \tableofcontents[currentsection,hidesubsections,subsectionstyle=hide]
+%        \tableofcontents[currentsection,%]%,% % normal one
+%        currentsubsection]
+        %hideothersubsections, 
+        %sectionstyle=show/shaded, 
+        %%sectionstyle=show/hide, 
+        %subsectionstyle=show/shaded, 
+        %]
+%        \tableofcontents[currentsection] % before Nov 2015, used this
+        %\tableofcontents[currentsubsection]
+        \normalsize
+        \addtocounter{framenumber}{-1}
+    \end{frame}}
+
+% From http://tex.stackexchange.com/questions/30720/footnote-without-a-marker
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+
+
 \title{A Brief Introduction to Optimization Algorithms on Matrix Manifolds}
 \date{11 October, 2016}
 \author{James Folberth} %TODO add Stephen as advisor?  Don't want people to think this is our work!
@@ -237,41 +267,50 @@
    \[ f: \reals^n_\ast \to \reals: y\mapsto f(y) = \dfrac{y^TAy}{y^Ty}. \] 
 
    %NOTE no interesting manifold aspects; \reals^n is a linear manifold (in fact, a Euclidean space)
-   \noindent $\reals^n_\ast$ is $\reals^n$ with the origin removed.\\[.5em]
+   \noindent $\reals^n_\ast$ is $\reals^n$ with the origin removed\footnote{$\reals_\ast^{n\times p}$ - full-rank, $n\times p$ matrices}.\\[.5em]
    
    %NOTE Critical points of $f$ correspond to eigenvalues of $A$.
-
-   \noindent The minimizers of $f(y)$ are \emph{not} isolated: they appear as the continuum $v_1\reals_\ast$.\\[.5em]
+   
+   \pause
+   \noindent The minimizers of $f(y)$ are \emph{not} isolated: they appear as the continuum $v_1\reals_\ast = \{v_1r : 0\neq r\in\reals\}$.\\[.5em]
 
    \noindent Consequently, important optimization algorithms may not apply.\\[.5em]
    
-   %TODO shorten to "... for every noncritical y"?
-   \noindent Newton's method applied to the Rayleigh quotient yields the iteration $y\mapsto 2y$ for every $y$ such that $f(y)$ is not an eigenvalue of $A$.
+   %OLD\noindent Newton's method applied to the Rayleigh quotient yields the iteration $y\mapsto 2y$ for every non-critical $y$.
+   \noindent For every non-critical $y$, Newton's method gives
+
+   \[ y\mapsto 2y. \] 
+
 \end{frame}
 
 
 %TODO want to put Embedded submanifold, Quotient manifold.  How to format?
-\begin{frame}{Rayleigh Quotient}
+%\begin{frame}{Rayleigh Quotient} % no nonsense
+\begin{frame}{Rayleigh Quotient - The $\mathcal{M}$ Word} % nonsense
+   \setbeamercovered{transparent}
    \begin{columns}
       \begin{column}{0.5\textwidth}
-   A standard remedy is to restrict the Rayleigh quotient to the unit sphere
+         \uncover<1>{A standard remedy is to restrict the Rayleigh quotient to the unit sphere
 
    \[ S^{n-1}\defeq \left\{y\in\reals^n \,:\, y^Ty=1\right\}. \]
    
-   \noindent Minimizers are now isolated, however the domain of $f$ is now nonlinear.\\[.5em]
+   %\noindent Minimizers are now isolated, however the domain of $f$ is now nonlinear.\\[.5em]
+   \noindent Minimizers are now isolated, and we must work on the sphere.\\[.5em]
    %NOTE but that's okay, because that's the whole point of the book.
 
    %NOTE This takes an unconstrained problem and adds a constraint.  We handle the constraint
    %     by incorporating the constraint into the geometry of the domain.
    
    \begin{center}
-      ~\\[1.45em] %HACK
+      ~\\[1.3em] %HACK
       \color{red}{Embedded submanifold}
    \end{center}
+}
       \end{column}
 
       \begin{column}{0.5\textwidth}
-   Another approach: Consider all points on a ray $y\reals_\ast$ as a single point.  This leads us to use the domain
+         %\uncover<2>{Consider all points on a (two-sided) ray $y\reals_\ast$\footnotemark[1] as a single point.  This leads us to use the domain
+         \uncover<2>{Treat all points on a two-sided ray $y\reals_\ast$\footnotemark[1] as a single point (equivalence class).
 
    \[ \mathcal{M} = \left\{y\reals_\ast \,:\, y\in\reals^n_\ast\right\}, \] 
 
@@ -279,37 +318,32 @@
    %NOTE Each point of M is now an equivalence class of points in \reals^n_\ast.
    %     In other words, M is the set of all 1-dimensional subspaces of \reals^n
    %     This set admits the structure of a quotient manifold; it is, in fact, RP^{n-1}
-   
-   Since $f(y\alpha)=f(y)$ $\forall \alpha \neq 0$, $f$ induces a well-defined function on $\mathcal{M}$.
+    
+   %UNUSED Since $f(y\alpha)=f(y)$ $\forall \alpha \neq 0$, $f$ induces a well-defined function on $\mathcal{M}$.
+   Minimizers are isolated, but points are now equivalence classes.
 
    \begin{center}
       \color{red}{Quotient manifold}
    \end{center}
+}
       \end{column}
    \end{columns}
+
+   \uncover<2>{\footnotetext[1]{$\reals_\ast^{n\times p}$ - full-rank, $n\times p$ matrices}}
 \end{frame}
 
 %TODO how to wrap up Rayleigh quotient example?
+%     Lead into manifolds
 
-%TODO where to put this?  Seems out of place
-\begin{frame}{Some Common Manifolds}
 
-   \begin{description}
-      \item[Stiefel Manifold] $\mathrm{St}(p,n) \defeq \left\{X\in\reals^{n\times p}\,:\,X^TX=I_p\right\}$\\
-         $St(1,n) = S^{n-1}$\\
-         $St(n,n) = O_n$\\[.5em]
-         Applications in computer vision, PCA, ICA.\\[1em]
-
-      \item[Grassmann Manifold] $\mathrm{Grass}(p,n)$ is the set of all $p$-dimensional subspaces in $\reals^n$.\\
-         %NOTE Can identify $\mathrm{Grass}(p,n)$ with $\reals^{n\times p}_\ast\setminus\sim$, where
-         %\[ X\sim Y \leftrightarrow \operatorname{span}(X)=\operatorname{span}(Y). \] 
-         
-         $\mathrm{Grass}(1,n) = \reals\mathbb{P}^{n-1}$\\
-         $\mathrm{Grass}(n,n) = GL_n$\\
-         Applications in various dimension reduction problems.
-   \end{description}
-
-   There are many more (included in Manopt).
+\begin{frame}{Some Benefits}
+   
+   For optimization-based eigenvalue algorithms:\\
+   \begin{itemize}
+      \item Solid framework for convergence analysis.  Many algorithms exhibit almost global convergence.
+      \item Speed of convergence is intrinsic to the algorithm.  Gradient-based is linear; Newton-like are superlinear.
+      \item Matrix-free methods, so $A$ is used only as an operator $x\mapsto Ax$.
+   \end{itemize}
 \end{frame}
 
 % ]]]
@@ -322,16 +356,54 @@
 
 \section{Manifolds}
 % [[[
-\begin{frame}{What is a Manifold?}
-   Roughly, a topological space that locally resembles $\reals^d$ near each point.\\[0.5em]
-   
+   \begin{frame}{What is a Smooth Manifold?}
+   %OLD Roughly, a topological space that locally resembles $\reals^d$ near each point.\\[0.5em]
+   \emph{Very roughly}, a (possibly) non-Euclidean space that locally resembles Euclidean space.\\[.5em]
+
    %NOTE We want all the charts (U,\varphi) to vary smoothly (C^\infty is a standard choice)
+   %     Basically mapping open sets of M smoothly to open sets of R^n.
    %     A maximal atlas of "nice+smooth" charts is a differentiable structure on M
    %NOTE Mention that we're only going to work with smooth manifolds
    \begin{center}
       \includegraphics[width=0.9\textwidth]{figures/charts.pdf}
    \end{center}
 \end{frame}
+
+
+\begin{frame}{Some Common Manifolds}
+   \begin{description}
+      \item[$\reals^n,\reals^{n\times p}$] Linear manifold viewed as vector space endowed with inner product (a Euclidean space).
+      \item[Sphere] $S^{n-1}\defeq\left\{x\in\reals^n\,:\,x^Tx=1\right\}$.
+         \begin{center}
+            \includegraphics[width=.3\textwidth]{figures/sphere_with_chart.png}
+         \end{center}
+   \end{description}
+\end{frame}
+
+\begin{frame}{Some Common Manifolds}
+   \setbeamercovered{transparent}
+   \begin{description}
+      \uncover<1>{\item[Stiefel Manifold] $\mathrm{St}(p,n) \defeq \left\{X\in\reals^{n\times p}\,:\,X^TX=I_p\right\}$\\$X$ is tall-skinny, has orthonormal columns
+         $St(1,n) = S^{n-1}$\\
+         $St(n,n) = O_n$\\[.5em]
+         Applications in computer vision, PCA, ICA.\\[1em]}
+   
+      \uncover<2>{\item[Grassmann Manifold] $\text{Grass}(p,n)\simeq \reals_\ast^{n\times p}/ \text{GL}_p$\\
+         The set of all $p$-dimensional subspaces in $\reals^n$.\\
+         %NOTE Can identify $\mathrm{Grass}(p,n)$ with $\reals^{n\times p}_\ast\setminus\sim$, where
+         %\[ X\sim Y \leftrightarrow \operatorname{span}(X)=\operatorname{span}(Y). \] 
+         
+         $\text{Grass}(1,n) = \reals\mathbb{P}^{n-1}$\\
+         $\text{Grass}(n,n) = \text{GL}_n$\\[.5em]
+         Applications in various dimension reduction problems.}
+   \end{description}
+
+   \uncover<2->{There are many more (included in Manopt).}
+   
+   \vspace{1em}
+   \uncover<2->{\footnotesize $\reals_\ast^{n\times p}$ - full-rank, $n\times p$ matrices}
+\end{frame}
+
 
 
 \begin{frame}{Tangent Vectors}
@@ -341,6 +413,8 @@
    \[ \gamma'(0) = \lim_{\tau\to 0} \dfrac{\gamma(\tau)-\gamma(0)}{\tau}, \] 
    
    %NOTE And if M is linear, what are we even doing here?
+   %     Be sure to _really_ point out that \gamma(t) \in M, and that we don't
+   %     (always) have a linear structure on M.
    \noindent as this requires a vector space structure on $\mathcal{M}$.
     
    %NOTE Here we visualize an embedded submanifold of a vector space \mathcal{E}.  The vector v in 
@@ -354,14 +428,16 @@
 \begin{frame}{Tangent Vectors}
    A tangent vector $\xi_x$ is a mapping, realized by $\gamma$, defined by %OLD taking $f$ to $\reals$ defined by
    
-   %NOTE This definition makes sense because we can do f(gamma(tau)) - f(gamma(0)), since R is an TVS
+   %NOTE This definition makes sense because we can do f(gamma(tau)) - f(gamma(0)),
+   %     since R is a vector space
    %     Also, there are other ways of defining tangent vectors (e.g. derivations)
    \[ \xi_x f = \dot{\gamma}(0)f \defeq \dfrac{\drm(f(\gamma(t)))}{\drm t}\biggr|_{t=0}, \] 
    
    \noindent for all smooth $f:\mathcal{M}\to\reals$.\\
 
    %NOTE Be sure to mention that the tangent space admits a vector space structure.
-   \noindent The set of all tangent vectors based at $x$ is the tangent space $T_x\mathcal{M}$.  %TODO Do we need this: The tangent bundle is $\cup_{x\in\mathcal{M}}T_x\mathcal{M}$.
+   %     One can think of the tangent space as a local, vector space approximation to M
+   \noindent The set of all tangent vectors based at $x$ is the tangent space $T_x\mathcal{M}$.  Each tangent space is a \emph{vector space}.  %TODO Do we need this: The tangent bundle is $\cup_{x\in\mathcal{M}}T_x\mathcal{M}$.
 
    \begin{center}
       \includegraphics[width=0.7\textwidth]{figures/tangent_space.pdf}
@@ -386,23 +462,25 @@
 
 
 \begin{frame}{Riemannian Metric}
-   A Riemannian metric is a smoothly varying \emph{inner product} on the tangent spaces of $\mathcal{M}$:
+   \setbeamercovered{transparent}
+   \uncover<1->{A Riemannian metric is a smoothly varying \emph{inner product} on the tangent spaces of $\mathcal{M}$:
    
    %NOTE The Riemannian metric can be induced from the ambient space (e.g. R^{n x p}), or somewhere else
    %     The notation g_x is just to indicate that the metric generally depends on x\in M
    \[ g(\xi_x,\zeta_x) = g_x(\xi_x,\zeta_x). \] 
 
-   A Euclidean space $\mathcal{E}$ is a particular Riemannian manifold.\\
+   A Euclidean space $\mathcal{E}$ is a particular \emph{Riemannian manifold}.\\}
 
-   A Riemannian metric allows us to compute
+   \uncover<2->{A Riemannian metric allows us to compute}
    \begin{itemize}
-      \item lengths
+      \uncover<2->{\item lengths
 
          \[ L(\gamma) = \int_a^b \sqrt{g(\dot{\gamma}(t),\dot{\gamma}(t))}\drm t. \] 
-
-      \item distances (a metric space \emph{metric})
+      }
+   \uncover<3->{\item distances (a metric space \emph{metric})
          
          \[ \operatorname{dist}:\mathcal{M}\times\mathcal{M}\to\reals:\operatorname{dist}(x,y)=\inf_{\Gamma_{x\to y}} L(\gamma) \] 
+         }
    \end{itemize}
 \end{frame}
 
@@ -410,7 +488,9 @@
    \begin{itemize}
       %NOTE emphasize that this is the "Riemannian" gradient, but one can compute it from the "Euclidean" gradient
       \item gradients: The unique element of $T_x\mathcal{M}$ that satisfies
-
+         
+         %NOTE Maybe write on the board Calc III style
+         %     D_\hat{u}f(x) = \nabla f(x) \cdot \hat{u}
          \[ g_x(\operatorname{grad}f(x),\xi) = Df(x)[\xi], \quad \forall \xi\in T_x\mathcal{M}. \] 
 
          \noindent Can compute the Euclidean gradient $\nabla \bar{f}(x)$ and convert to Riemannian gradient $\operatorname{grad}f(x)$.
@@ -454,7 +534,7 @@
 
    \noindent Line-search over a curve s.t. $\gamma(0)=x$ and $\dot{\gamma}(0)=-\operatorname{grad}f(x)$.\\[0.5em]
 
-   \noindent We need a method to cheaply find suitable curves (geodesics work, but are expensive to find).\\
+   \noindent We need a method to cheaply find suitable curves (geodesics work, but are generally expensive to find).\\
        
    \begin{center}
       \includegraphics[width=0.8\textwidth]{figures/GD_M.pdf}
@@ -470,6 +550,9 @@
       \item $\diff{}{t}R(t\xi_x)\biggr|_{t=0} = \xi_x \quad \forall \xi_x\in T_x\mathcal{M}$.
    \end{enumerate}
    
+   %NOTE Item 2 is a slight abuse of notation.  Consider the curve gamma(t) = R(t\xi).
+   %     Then we should have \dot{\gamma}(0)=\xi
+
    %NOTE compare to Exp_x, which is nice theoretically, but expensive to compute.
    %     Retractions should be a cheaper alternative, unless geodesics have a nice closed form
    %     (e.g. PD matrices)
@@ -500,26 +583,30 @@
 
 
 \begin{frame}{Gradient Descent for the Rayleigh Quotient on $S^{n-1}$}
-   Consider the sphere $S^{n-1}$.  We can view $x\in S^{n-1}$ as an element of $\reals^n$, and $\xi\in T_xS^{n-1}$ as an element of $T_x\reals^n\simeq \reals^n$.\\[.5em]
+   \setbeamercovered{transparent}
+   \uncover<1>{Consider the sphere $S^{n-1}$.  We can view $x\in S^{n-1}$ as an element of $\reals^n$, and $\xi\in T_xS^{n-1}$ as an element of $T_x\reals^n\simeq \reals^n$.\\[.5em]
 
-   A suitable retraction on $S^{n-1}$ is the renormalization:
+   %NOTE this retraction is sometimes called the projective retraction, since it is 
+   %     a projection radially down onto the sphere.
+   A suitable retraction on $S^{n-1}$ is the projection/renormalization:
 
    \[ R_x(\xi) = \dfrac{x+\xi}{\|x+\xi\|}. \] 
+   }
    
-   ~\\
-   Consider the Rayleigh quotient on the sphere:
+   \uncover<2>{Consider the Rayleigh quotient on the sphere:
    
    \[ f:S^{n-1}\to \reals: x\mapsto f(x) =x^TAx. \] 
 
    It is easy to show
    
    \[ \operatorname{grad}f(x)=(I-xx^T)2Ax = 2(Ax-xx^TAx). \] 
-
+   }
 \end{frame}
 
 
 \begin{frame}{Gradient Descent for the Rayleigh Quotient on $S^{n-1}$}
    
+   %NOTE if we take the step t_k = 1/(2x_k^TAx_k), we recover the power method
    \begin{algorithm}[H]
       \caption{Armijo line search for the Rayleigh quotient on $S^{n-1}$}
       \begin{algorithmic}[1] % the [1] adds line numbers
@@ -535,6 +622,8 @@
          \EndFor
       \end{algorithmic}
    \end{algorithm}
+   
+   If we take $t_k = 1/(2x_k^TAx_k)$, we recover the \emph{power method}.
 
 \end{frame}
 
@@ -597,6 +686,8 @@
 
 \begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
    
+   %NOTE Manifolds in Manopt are described by structures.  There are "factory" functions that return
+   %     these structures, and the fields of the structure provide common routines, such as ...
    \begin{lstlisting}[language=Matlab]
 % Generate symmetric matrix
 n = 1000;
@@ -676,6 +767,7 @@ checkgradient(problem);
 
 \begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
 
+%NOTE The x coming out here is the top (algebraic) eigenvector
 {
 \begin{lstlisting}[language=Matlab,escapechar=!]
 % Generate symmetric matrix
@@ -708,7 +800,10 @@ problem.egrad = @(x) -2*A*x;
 
 
 
-\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $\mathrm{Grass}(p,n)$}
+\begin{frame}[fragile]{Manopt - Generalized Rayleigh Quotient on $\text{Grass}(p,n)$}
+%NOTE The Y coming out here is spans the invariant subspace corresponding to the 
+%     largest (algebraic) p eigenvalues.  Internally to Manopt, Y is stored as an ON matrix;
+%     this is done for efficiency, accuracy, and convenience.
 \begin{lstlisting}[language=Matlab,escapechar=!]
 % Generate symmetric matrix
 n = 1000;
@@ -720,6 +815,7 @@ M = grassmannfactory(n,p);
 problem.M = M;
 
 % Define cost function and Riemannian gradient
+% In grassmannfactory, Y is an ON matrix
 problem.cost = @(Y) -trace(Y'*A*Y);
 problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
 
@@ -731,41 +827,77 @@ problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $\mathrm{Grass}(p,n)$}
+\begin{frame}[fragile]{Manopt - Generalized Rayleigh Quotient on $\text{Grass}(p,n)$}
    \begin{center}
       \includegraphics[width=\textwidth]{figures/rayleigh_grassmann_gradnorm.pdf}
    \end{center}
 \end{frame}
 
 %TODO this slide isn't complete
-\begin{frame}{Manopt}
-   Manopt is modular:
-   \begin{itemize}
-      \item Manifolds (55 currently implemented)
-      \item Solvers (GD, CG, Trust-region, etc.)
-      \item Tools (gradient check)
-   \end{itemize}
-\end{frame}
+%\begin{frame}{Manopt}
+%   Manopt is modular:
+%   \begin{itemize}
+%      \item Manifolds (55 currently implemented)
+%      \item Solvers (GD, CG, Trust-region, etc.)
+%      \item Tools (gradient check)
+%   \end{itemize}
+%\end{frame}
 
 % ]]]
 
 
-%TODO g-convex result from S. Sra + R. Hosseini's paper
+%TODO g-convex result from S. Sra + R. Hosseini's paper?
 %TODO low-rank matrix completion stuff?
-\section{Recent Work}
+\section{Some Recent Work}
 % [[[
-\begin{frame}
+\begin{frame}{Geodesic Convexity for GMMs}
+   Recent work by Suvrit Sra and Reshad Hosseini.\\
+
+   GMM loss is non-convex.
+
+   \begin{center}
+      \includegraphics[width=.8\textwidth]{figures/gmm.png}
+   \end{center}
+\end{frame}
+
+\begin{frame}{Geodesic Convexity for GMMs}
+   \begin{definition}[g-convex sets]
+      A set $\mathcal{X}\subset \mathcal{M}$ is \emph{geodesically convex} if any two points of $\mathcal{X}$ are joined by a geodesic in $\mathcal{X}$.
+   \end{definition}
+   \begin{definition}[g-convex functions]
+      Let $\mathcal{X}\subset \mathcal{M}$ be g-convex.  A function $f:\mathcal{X}\to\reals$ is \emph{geodesically convex} if $\forall x,y\in\mathcal{M}$,
+
+      \[ f(\gamma(t)) \le (1-t) f(x) + tf(y), \] 
+
+      \noindent where $\gamma:[0,1]\to\mathcal{X}$ is a geodesic connecting $x$ and $y$.
+   \end{definition}
+
+\end{frame}
+
+\begin{frame}{Geodesic Convexity for GMMs}
+   Can reparameterize GMM loss over manifold of positive-definite matrices so fitting a \emph{single} Gaussian \emph{is} g-convex.\\
+   \emph{GMM loss is still not g-convex}.\\
+   However, there \emph{is} a substantial benefit (competitive with EM).
+
+   \begin{center}
+      \includegraphics[width=1\textwidth]{figures/gmm_loss.pdf}
+   \end{center}
 \end{frame}
 
 % ]]]
 
 
 \begin{frame}{Thanks!}
-    
+   
+   \begin{center}
+      \includegraphics[width=0.5\textwidth]{figures/torus.png}
+   \end{center}
    
    References:
    \begin{itemize}
       \item P.-A. Absil, R. Mahoney, R. Sepulchre, \emph{Optimization Algorithms on Matrix Manifolds}, Princeton University Press (2008).
+      \item N. Boumal, B. Mishra, P.-A. Absil, R. Sepulchre, \emph{Manopt: a Matlab Toolbox for Optimization on Manifolds}, JMLR (2014).
+      \item R. Hosseini, S. Sra, \emph{Manifold Optimization for Gaussian Mixture Models}, Arxiv:1506.07677 (2015).
    \end{itemize}
 \end{frame}
 
