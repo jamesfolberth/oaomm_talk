@@ -202,7 +202,6 @@
 \maketitle
 \end{frame}
 
-%TODO should we have a section name slide (e.g. a slide with a big "A Motivating Example" in the middle)?
 %TODO CU colors?  I asked Stephen before, but didn't follow through
 %TODO Riemann Newton's connection to Jacobi-Davidson
 
@@ -210,6 +209,7 @@
 % [[[
    Most of the material in this talk is from \emph{Optimization Algorithms on Matrix Manifolds}, P.-A. Absil, R. Mahoney, R. Sepulchre, Princeton University Press, 2008.\\
    
+   %NOTE none of this is my own work!
    \begin{columns}
       \begin{column}{0.4\textwidth}
          \begin{center}
@@ -245,7 +245,7 @@
       Consider the \emph{generalized Rayleigh quotient}
       
       %NOTE f(Y) depends only of span(Y), not on each individual column;
-      %     This a fundamental reason for optimizing of Grass(p,n)
+      %     This a fundamental reason for optimizing on Grass(p,n)
       \[ f:\reals^{n\times p}_\ast \to \reals : Y \mapsto f(Y) = \operatorname{tr}(Y^TAY(Y^TY)^{-1}) \] 
 
       \noindent defined on $\reals^{n\times p}_\ast$, the set of all real $n\times p$ full-rank matrices.\\
@@ -257,6 +257,8 @@
          \item $f(Y_\ast) = \sum_{i=1}^p \lambda_i$.
       \end{enumerate}
    \end{proposition*}
+
+   Fact: $f(Y)$ depends only on $\operatorname{span}(Y)$.
 
 \end{frame}
 
@@ -284,9 +286,8 @@
 \end{frame}
 
 
-%TODO want to put Embedded submanifold, Quotient manifold.  How to format?
-%\begin{frame}{Rayleigh Quotient} % no nonsense
-\begin{frame}{Rayleigh Quotient - The $\mathcal{M}$ Word} % nonsense
+\begin{frame}{Rayleigh Quotient} % no nonsense
+%\begin{frame}{Rayleigh Quotient - The $\mathcal{M}$ Word} % nonsense
    \setbeamercovered{transparent}
    \begin{columns}
       \begin{column}{0.5\textwidth}
@@ -332,8 +333,8 @@
    \uncover<2>{\footnotetext[1]{$\reals_\ast^{n\times p}$ - full-rank, $n\times p$ matrices}}
 \end{frame}
 
-%TODO how to wrap up Rayleigh quotient example?
-%     Lead into manifolds
+%     how to wrap up Rayleigh quotient example?
+%     Lead into manifolds is OK.
 
 
 \begin{frame}{Some Benefits}
@@ -347,12 +348,6 @@
 \end{frame}
 
 % ]]]
-
-%TODO all this should go in a slide?  Maybe at the end?
-%NOTE what does additional geometric structure bring us?
-%     Convergence analysis is nice (optimization)
-%     Convergence speed is nice (gradient -> linear, higher-order -> superlinear)
-%     Matrix-free methods
 
 \section{Manifolds}
 % [[[
@@ -398,7 +393,7 @@
          Applications in various dimension reduction problems.}
    \end{description}
 
-   \uncover<2->{There are many more (included in Manopt).}
+   \uncover<2->{There are many more.}
    
    \vspace{1em}
    \uncover<2->{\footnotesize $\reals_\ast^{n\times p}$ - full-rank, $n\times p$ matrices}
@@ -426,18 +421,24 @@
 
 
 \begin{frame}{Tangent Vectors}
-   A tangent vector $\xi_x$ is a mapping, realized by $\gamma$, defined by %OLD taking $f$ to $\reals$ defined by
+   \setbeamercovered{transparent}
+   %OLD A tangent vector $\xi_x$ is a mapping, realized by $\gamma$, defined by %OLD taking $f$ to $\reals$ defined by
+   A tangent vector $\xi_x$ is a mapping that differentiates functions along curves:\\[-1em]
    
    %NOTE This definition makes sense because we can do f(gamma(tau)) - f(gamma(0)),
    %     since R is a vector space
    %     Also, there are other ways of defining tangent vectors (e.g. derivations)
-   \[ \xi_x f = \dot{\gamma}(0)f \defeq \dfrac{\drm(f(\gamma(t)))}{\drm t}\biggr|_{t=0}, \] 
+   \[ \xi_x f = \dot{\gamma}(0)f \defeq \dfrac{\drm(f(\gamma(t)))}{\drm t}\biggr|_{t=0} = \lim_{\tau\to 0}\dfrac{f(\gamma(\tau))-f(\gamma(0))}{\tau}, \] 
    
-   \noindent for all smooth $f:\mathcal{M}\to\reals$.\\
+   %OLD \noindent for all smooth $f:\mathcal{M}\to\reals$.\\
+   \noindent for all smooth $f:\mathcal{M}\to\reals$ along the curve $\gamma(t)$.\\
 
    %NOTE Be sure to mention that the tangent space admits a vector space structure.
-   %     One can think of the tangent space as a local, vector space approximation to M
-   \noindent The set of all tangent vectors based at $x$ is the tangent space $T_x\mathcal{M}$.  Each tangent space is a \emph{vector space}.  %TODO Do we need this: The tangent bundle is $\cup_{x\in\mathcal{M}}T_x\mathcal{M}$.
+   %     One can think of the tangent space as a local, vector space approximation to M.
+   %     However, all of these vectors are based at x.  We cannot trivially move vectors
+   %     from one tangent space to another.
+   %OLD \noindent The set of all tangent vectors based at $x$ is the tangent space $T_x\mathcal{M}$.  Each tangent space is a \emph{vector space}.  %TODO Do we need this: The tangent bundle is $\cup_{x\in\mathcal{M}}T_x\mathcal{M}$.
+   \noindent Tangent space at $x$: $T_x\mathcal{M} = \{\xi_x\}$, is a \emph{vector space}.
 
    \begin{center}
       \includegraphics[width=0.7\textwidth]{figures/tangent_space.pdf}
@@ -452,7 +453,8 @@
    
    \noindent where $x+t\xi_x$ only makes sense for vector spaces.\\[.5em]
 
-   \noindent More generally, if $\xi_x$ is realized by $\gamma(t)$,
+   %OLD \noindent More generally, if $\xi_x$ is realized by $\gamma(t)$,
+   \noindent More generally, tangent vectors compute directional derivatives:
 
    \begin{align*} Df(x)[\xi_x] &= \xi_xf\\
                                &= \dot{\gamma}(0)f = \dfrac{\drm(f(\gamma(t)))}{\drm t}\biggr|_{t=0}.
@@ -657,32 +659,6 @@
    \end{center}
 \end{frame}
 
-%TODO highlight code, or just display only the portion we care about?  Ask Stephen.
-%\begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
-%
-%{
-%\begin{lstlisting}[language=Matlab,escapechar=!]
-%% Generate symmetric matrix
-%!\colorbox{yellow}{n = 1000;}!
-%!\colorbox{yellow}{A = randn(n); A = 0.5*(A+A.');}!
-%
-%% Create problem structure
-%!\colorbox{yellow}{M = spherefactory(n);}!
-%!\colorbox{yellow}{problem.M = M;}!
-%
-%% Define cost function and Euclidean gradient
-%problem.cost = @(x) -x'*(A*x);
-%problem.egrad = @(x) -2*A*x;
-%
-%% Numerically check gradient consistency
-%%checkgradient(problem);
-%
-%% Solve
-%[x,xcost,info,opt] = trustregions(problem);
-%\end{lstlisting}
-%}
-%
-%\end{frame}
 
 \begin{frame}[fragile]{Manopt - Rayleigh Quotient on $S^{n-1}$}
    
@@ -851,16 +827,6 @@ problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
 \section{Some Recent Work}
 % [[[
 \begin{frame}{Geodesic Convexity for GMMs}
-   Recent work by Suvrit Sra and Reshad Hosseini.\\
-
-   GMM loss is non-convex.
-
-   \begin{center}
-      \includegraphics[width=.8\textwidth]{figures/gmm.png}
-   \end{center}
-\end{frame}
-
-\begin{frame}{Geodesic Convexity for GMMs}
    \begin{definition}[g-convex sets]
       A set $\mathcal{X}\subset \mathcal{M}$ is \emph{geodesically convex} if any two points of $\mathcal{X}$ are joined by a geodesic in $\mathcal{X}$.
    \end{definition}
@@ -873,6 +839,17 @@ problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
    \end{definition}
 
 \end{frame}
+
+\begin{frame}{Geodesic Convexity for GMMs}
+   Recent work by Suvrit Sra and Reshad Hosseini.\\
+
+   GMM loss is Euclidean non-convex and also not g-convex.
+
+   \begin{center}
+      \includegraphics[width=.8\textwidth]{figures/gmm.png}
+   \end{center}
+\end{frame}
+
 
 \begin{frame}{Geodesic Convexity for GMMs}
    Can reparameterize GMM loss over manifold of positive-definite matrices so fitting a \emph{single} Gaussian \emph{is} g-convex.\\
@@ -902,17 +879,27 @@ problem.grad = @(Y) -2*(A*Y - Y*(Y'*A*Y));
 \end{frame}
 
 
+% Backup slides
+\begin{frame}
+\end{frame}
+
 
 \begin{frame}{Pictures}
    I took various pictures from
    
    \begin{itemize}
-      \item ``Optimization Algorithms on Matrix Manifolds''
+      \item References above 
       \item ``Optimization on Manifolds: Methods and Applications'', P.-A. Absil at British-French-German Conference on Optimization, 2009.
       \item Wikipedia
+      \item \url{http://yulearning.blogspot.com/2014/11/einsteins-most-famous-equation-is-emc2.html}
    \end{itemize}
 
 \end{frame}
+
+
+
+
+
 
 % [[[ OLD TALK
 %\begin{frame}{Outline}
